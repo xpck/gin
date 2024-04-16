@@ -11,8 +11,8 @@ func setRouteName(method, relativePath, routeName string) {
 	routeTable[[2]string{method, relativePath}] = routeName
 }
 
-// GetRouteNameByPath Get route name by method and path.
-func GetRouteNameByPath(method, path string) (string, bool) {
+// GetRouteName Get route name by method and path.
+func GetRouteName(method, path string) (string, bool) {
 	name, b := routeTable[[2]string{method, path}]
 	return name, b
 }
