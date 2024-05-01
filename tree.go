@@ -22,8 +22,8 @@ var (
 
 // Param is a single URL parameter, consisting of a key and a value.
 type Param struct {
-	Key   string
-	Value string
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // Params is a Param-slice, as returned by the router.
