@@ -77,6 +77,15 @@ func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *R
 	}
 }
 
+func (group *RouterGroup) GroupEX(relativePath string, name string, handlers ...HandlerFunc) *RouterGroup {
+	api.setGroup(group.basePath, group.calculateAbsolutePath(relativePath), name)
+	return &RouterGroup{
+		Handlers: group.combineHandlers(handlers),
+		basePath: group.calculateAbsolutePath(relativePath),
+		engine:   group.engine,
+	}
+}
+
 // BasePath returns the base path of router group.
 // For example, if v := router.Group("/rest/n/v1/api"), v.BasePath() is "/rest/n/v1/api".
 func (group *RouterGroup) BasePath() string {
@@ -90,9 +99,9 @@ func (group *RouterGroup) handle(httpMethod, relativePath string, handlers Handl
 	return group.returnObj()
 }
 
-func (group *RouterGroup) handleWithRouteName(httpMethod, relativePath, routeName string, handlers HandlersChain) IRoutes {
+func (group *RouterGroup) handleWithRouteName(httpMethod, relativePath, name string, handlers HandlersChain) IRoutes {
 	absolutePath := group.calculateAbsolutePath(relativePath)
-	setRouteName(httpMethod, absolutePath, routeName)
+	api.setRoute(httpMethod, group.basePath, absolutePath, name)
 	handlers = group.combineHandlers(handlers)
 	group.engine.addRoute(httpMethod, absolutePath, handlers)
 	return group.returnObj()

@@ -1,28 +1,13 @@
 package gin
 
-import "maps"
-
-// routeTable storage [[method, path]: name]
-// this is not concurrent safe
-// example:
-var routeTable = make(map[[2]string]string)
-
-func setRouteName(method, relativePath, routeName string) {
-	routeTable[[2]string{method, relativePath}] = routeName
+var api = &ApiGroup{
+	Path:  "/",
+	Name:  "root",
+	Group: make([]*ApiGroup, 0),
+	Api:   []ApiInfo{},
 }
 
-// GetRouteName Get route name by method and path.
-func GetRouteName(method, path string) (string, bool) {
-	name, b := routeTable[[2]string{method, path}]
-	return name, b
-}
-
-// GetRouteTable clone route table.
-func GetRouteTable() map[[2]string]string {
-	return maps.Clone(routeTable)
-}
-
-// ApiInfo record api information: name, path, method, such as: ApiInfo{ Name:"query user list", FullPath:"/user/:id", Method:"GET"}.
+// ApiInfo record api information, about name, path, method, such as: ApiInfo{ Name:"query user list", FullPath:"/user/:id", Method:"GET"}.
 type ApiInfo struct {
 	Name     string `json:"name"`
 	FullPath string `json:"full_path"`
@@ -36,7 +21,7 @@ type ApiGroup struct {
 	Api   []ApiInfo   `json:"api"`
 }
 
-func (a *ApiGroup) setGroup(basePath, path, name string) { //nolint:unused
+func (a *ApiGroup) setGroup(basePath, path, name string) {
 	if a.Path == basePath {
 		a.Group = append(a.Group, &ApiGroup{
 			Path:  path,
@@ -51,7 +36,7 @@ func (a *ApiGroup) setGroup(basePath, path, name string) { //nolint:unused
 	}
 }
 
-func (a *ApiGroup) setRoute(basePath, fullPath, name, method string) { //nolint:unused
+func (a *ApiGroup) setRoute(method, basePath, fullPath, name string) {
 	if a.Path == basePath {
 		a.Api = append(a.Api, ApiInfo{
 			Name:     name,
@@ -60,7 +45,53 @@ func (a *ApiGroup) setRoute(basePath, fullPath, name, method string) { //nolint:
 		})
 	} else {
 		for _, group := range a.Group {
-			group.setRoute(basePath, fullPath, name, method)
+			group.setRoute(method, basePath, fullPath, name)
 		}
 	}
+}
+
+func (a *ApiGroup) getRouteName(method string, fullPath string) string {
+	for _, info := range a.Api {
+		if info.FullPath == fullPath && info.Method == method {
+			return info.Name
+		}
+	}
+	for _, group := range a.Group {
+		if name := group.getRouteName(method, fullPath); name != "" {
+			return name
+		}
+	}
+
+	return ""
+}
+
+func (a *ApiGroup) getGroup(path string) *ApiGroup {
+	if a.Path == path {
+		return a
+	}
+	for _, group := range a.Group {
+		if result := group.getGroup(path); result != nil {
+			return result
+		}
+	}
+
+	return nil
+}
+
+// GetGroup return group's api info.
+func GetGroup(path string) (ApiGroup, bool) {
+	group := api.getGroup(path)
+
+	if group == nil {
+		return ApiGroup{}, false
+	}
+
+	return *group, true
+}
+
+// GetApiName return api name.
+func GetApiName(method string, fullPath string) (string, bool) {
+	name := api.getRouteName(method, fullPath)
+
+	return name, name != ""
 }
