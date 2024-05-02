@@ -22,18 +22,18 @@ func GetRouteTable() map[[2]string]string {
 	return maps.Clone(routeTable)
 }
 
-// ApiInfo record api information, about name, path, method, such as: ApiInfo{ Name:"query user list", FullPath:"/user/:id", Method:"GET"}.
+// ApiInfo record api information: name, path, method, such as: ApiInfo{ Name:"query user list", FullPath:"/user/:id", Method:"GET"}.
 type ApiInfo struct {
-	Name     string
-	FullPath string
-	Method   string
+	Name     string `json:"name"`
+	FullPath string `json:"full_path"`
+	Method   string `json:"method"`
 }
 
 type ApiGroup struct {
-	Path  string
-	Name  string
-	Group []*ApiGroup
-	Api   []ApiInfo
+	Path  string      `json:"path"`
+	Name  string      `json:"name"`
+	Group []*ApiGroup `json:"group"`
+	Api   []ApiInfo   `json:"api"`
 }
 
 func (a *ApiGroup) setGroup(basePath, path, name string) { //nolint:unused
