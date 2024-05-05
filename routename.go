@@ -79,14 +79,14 @@ func (a *ApiGroup) getGroup(path string) *ApiGroup {
 }
 
 // GetGroup return group's api info.
-func GetGroup(path string) (ApiGroup, bool) {
+func GetGroup(path string) (*ApiGroup, bool) {
 	group := api.getGroup(path)
 
 	if group == nil {
-		return ApiGroup{}, false
+		return nil, false
 	}
 
-	return *group, true
+	return group, true
 }
 
 // GetApiName return api name.
@@ -94,4 +94,24 @@ func GetApiName(method string, fullPath string) (string, bool) {
 	name := api.getRouteName(method, fullPath)
 
 	return name, name != ""
+}
+
+// GetApiTable returns all APIs for the group. If group is nil, return all APIs(gin.api).
+func GetApiTable(group *ApiGroup) []ApiInfo {
+	if group == nil {
+		group = api
+	}
+
+	return group.getApiTable()
+}
+
+func (a *ApiGroup) getApiTable() []ApiInfo {
+	table := make([]ApiInfo, 0)
+	table = append(table, a.Api...)
+	for _, group := range a.Group {
+		group := group
+		table = append(table, group.getApiTable()...)
+	}
+
+	return table
 }

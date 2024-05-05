@@ -6,6 +6,8 @@
 - Record group name, and group's api.
 - Add two struct to record api with using `RouterGroup.GroupEX()` and `RouterGroup.PUTEX(),RouterGroup.GETEX(),RouterGroup.DELETEEX(),RouterGroup.GETEX(),RouterGroup.PATCHEX()`
 ```go
+package gin
+
 type ApiInfo struct {
 	Name     string `json:"name"`
 	FullPath string `json:"full_path"`
@@ -20,7 +22,7 @@ type ApiGroup struct {
 }
 ```
 - Add two function to get information about api.(If you use builtin method, that you can't get information from the following two APIs)
-  - `func GetGroup(path string) (ApiGroup, bool)`
+  - `func GetGroup(path string) (*ApiGroup, bool)`
   - `func GetApiName(method string, fullPath string) (string, bool)`
 ```go
 package main

@@ -12,8 +12,8 @@ const (
 	_msg   = "msg"
 	_total = "total"
 
-	_errParam  = "invalid params"
-	_noContent = "no content"
+	_errParameter = "invalid parameter"
+	_noContent    = "no content"
 )
 
 func (c *Context) ServerError(msg string, err error) {
@@ -42,30 +42,30 @@ func (c *Context) NoContent(data any) {
 
 func (c *Context) BadRequest(err error) {
 	if err == nil {
-		err = errors.New(_errParam)
+		err = errors.New(_errParameter)
 	}
 	c.JSON(http.StatusBadRequest, H{
 		_msg: err.Error(),
-		_err: _errParam,
+		_err: _errParameter,
 	})
 
 	c.Errors = append(c.Errors, &Error{
 		Err:  err,
 		Type: ErrorTypeAny,
-		Meta: _errParam,
+		Meta: _errParameter,
 	})
 }
 
 func (c *Context) BadReqStr(msg string) {
 	c.JSON(http.StatusBadRequest, H{
 		_msg: msg,
-		_err: _errParam,
+		_err: _errParameter,
 	})
 
 	c.Errors = append(c.Errors, &Error{
-		Err:  errors.New(_errParam),
+		Err:  errors.New(msg),
 		Type: ErrorTypeAny,
-		Meta: _errParam,
+		Meta: _errParameter,
 	})
 }
 

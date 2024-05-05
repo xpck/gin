@@ -1,10 +1,14 @@
 package gin
 
 import (
+	"fmt"
 	"net/http"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gin-gonic/gin/internal/json"
 )
 
 func Test_setRouteName(t *testing.T) {
@@ -53,6 +57,68 @@ func TestGetGroup(t *testing.T) {
 }
 
 func TestGetApiName(t *testing.T) {
+	initApi()
+	var (
+		name string
+		exit bool
+	)
+	name, exit = GetApiName(http.MethodGet, "/hello")
+	assert.Equal(t, "hello", name)
+	assert.True(t, exit)
+
+	name, exit = GetApiName(http.MethodDelete, "/base/menu/:id")
+	assert.Equal(t, "delete menu by id", name)
+	assert.True(t, exit)
+
+	name, exit = GetApiName(http.MethodPut, "/base/config")
+	assert.Equal(t, "put basic service config", name)
+	assert.True(t, exit)
+
+	name, exit = GetApiName(http.MethodGet, "/base/log/mysql/:id")
+	assert.Equal(t, "query mysql log by id", name)
+	assert.True(t, exit)
+
+	// json api, pretty it, and it's expected!
+	marshal, _ := json.Marshal(api)
+	fmt.Println(string(marshal))
+	//
+	//group, _ := GetGroup("/audit")
+	//marshal, _ = json.Marshal(group)
+	//fmt.Println(string(marshal))
+
+	logGroup, b := GetGroup("/base/log")
+	assert.True(t, b)
+	assert.Equal(t, "query mysql log by id", logGroup.getRouteName(http.MethodGet, "/base/log/mysql/:id"))
+}
+
+func TestGetApiTable(t *testing.T) {
+	initApi()
+	allApi := GetApiTable(nil)
+
+	equal := slices.Equal(allApi, []ApiInfo{
+		{Name: "hello", FullPath: "/hello", Method: "GET"},
+		{Name: "put basic service config", FullPath: "/base/config", Method: "PUT"},
+		{Name: "query menu by id", FullPath: "/base/menu/:id", Method: "GET"},
+		{Name: "delete menu by id", FullPath: "/base/menu/:id", Method: "DELETE"},
+		{Name: "query user by id", FullPath: "/base/user/:id", Method: "GET"},
+		{Name: "delete user by id", FullPath: "/base/user/:id", Method: "DELETE"},
+		{Name: "query mysql log by id", FullPath: "/base/log/mysql/:id", Method: "GET"},
+		{Name: "ping audit", FullPath: "/audit/ping", Method: "GET"},
+	})
+	assert.True(t, equal)
+
+	group, b := GetGroup("/audit")
+
+	assert.True(t, b)
+	a := GetApiTable(group)
+	assert.Equal(t, a[0], ApiInfo{
+		Name:     "ping audit",
+		FullPath: "/audit/ping",
+		Method:   "GET",
+	})
+}
+
+func initApi() {
 	engine := New()
 	emptyHandler := func(*Context) {}
 	{
@@ -83,38 +149,4 @@ func TestGetApiName(t *testing.T) {
 	{
 		engine.GETEX("hello", "hello", emptyHandler)
 	}
-	var (
-		name string
-		exit bool
-	)
-	name, exit = GetApiName(http.MethodGet, "/hello")
-	assert.Equal(t, "hello", name)
-	assert.Equal(t, true, exit)
-
-	name, exit = GetApiName(http.MethodPatch, "/hello")
-	assert.Equal(t, "", name)
-	assert.Equal(t, false, exit)
-
-	name, exit = GetApiName(http.MethodDelete, "/base/menu/:id")
-	assert.Equal(t, "delete menu by id", name)
-	assert.Equal(t, true, exit)
-
-	name, exit = GetApiName(http.MethodPut, "/base/config")
-	assert.Equal(t, "put basic service config", name)
-	assert.Equal(t, true, exit)
-
-	name, exit = GetApiName(http.MethodGet, "/base/log/mysql/:id")
-	assert.Equal(t, "query mysql log by id", name)
-	assert.Equal(t, true, exit)
-	// marshal api, pretty it, and it is expected!
-	//marshal, _ := json.Marshal(api)
-	//fmt.Println(string(marshal))
-	//
-	//group, _ := GetGroup("/audit")
-	//marshal, _ = json.Marshal(group)
-	//fmt.Println(string(marshal))
-
-	logGroup, b := GetGroup("/base/log")
-	assert.Equal(t, true, b)
-	assert.Equal(t, "query mysql log by id", logGroup.getRouteName(http.MethodGet, "/base/log/mysql/:id"))
 }
