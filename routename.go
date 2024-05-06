@@ -1,11 +1,15 @@
 package gin
 
-var api = &ApiGroup{
-	Path:  "/",
-	Name:  "root",
-	Group: make([]*ApiGroup, 0),
-	Api:   []ApiInfo{},
-}
+var (
+	api = &ApiGroup{
+		Path:  "/",
+		Name:  "root",
+		Group: make([]*ApiGroup, 0),
+		Api:   []ApiInfo{},
+	}
+	// storage all api, [2]string{method, fullPath}: name
+	apiMap = make(map[[2]string]string)
+)
 
 // ApiInfo record api information, about name, path, method, such as: ApiInfo{ Name:"query user list", FullPath:"/user/:id", Method:"GET"}.
 type ApiInfo struct {
@@ -37,6 +41,7 @@ func (a *ApiGroup) setGroup(basePath, path, name string) {
 }
 
 func (a *ApiGroup) setRoute(method, basePath, fullPath, name string) {
+	apiMap[[2]string{method, fullPath}] = name
 	if a.Path == basePath {
 		a.Api = append(a.Api, ApiInfo{
 			Name:     name,
@@ -90,14 +95,14 @@ func GetGroup(path string) (*ApiGroup, bool) {
 }
 
 // GetApiName return api name.
-func GetApiName(method string, fullPath string) (string, bool) {
-	name := api.getRouteName(method, fullPath)
+func GetApiName(method, fullPath string) (string, bool) {
+	name, exist := apiMap[[2]string{method, fullPath}]
 
-	return name, name != ""
+	return name, exist
 }
 
-// GetApiTable returns all APIs for the group. If group is nil, return all APIs(gin.api).
-func GetApiTable(group *ApiGroup) []ApiInfo {
+// GetApiList returns all APIs for the group. If group is nil, return all APIs(gin.api).
+func GetApiList(group *ApiGroup) []ApiInfo {
 	if group == nil {
 		group = api
 	}
@@ -105,11 +110,14 @@ func GetApiTable(group *ApiGroup) []ApiInfo {
 	return group.getApiTable()
 }
 
+func GetApiMap() map[[2]string]string {
+	return apiMap
+}
+
 func (a *ApiGroup) getApiTable() []ApiInfo {
 	table := make([]ApiInfo, 0)
 	table = append(table, a.Api...)
 	for _, group := range a.Group {
-		group := group
 		table = append(table, group.getApiTable()...)
 	}
 

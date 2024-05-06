@@ -29,6 +29,10 @@ func Test_setRouteName(t *testing.T) {
 
 	api.setRoute(http.MethodGet, "/audit/log", "/audit/log/metrics", "query audit metrics")
 	assert.Equal(t, "query audit metrics", api.getRouteName(http.MethodGet, "/audit/log/metrics"))
+
+	name, b := GetApiName(http.MethodGet, "/audit/log/metrics")
+	assert.Equal(t, "query audit metrics", name)
+	assert.True(t, b)
 }
 
 func TestGetGroup(t *testing.T) {
@@ -91,9 +95,9 @@ func TestGetApiName(t *testing.T) {
 	assert.Equal(t, "query mysql log by id", logGroup.getRouteName(http.MethodGet, "/base/log/mysql/:id"))
 }
 
-func TestGetApiTable(t *testing.T) {
+func TestGetApiList(t *testing.T) {
 	initApi()
-	allApi := GetApiTable(nil)
+	allApi := GetApiList(nil)
 
 	equal := slices.Equal(allApi, []ApiInfo{
 		{Name: "hello", FullPath: "/hello", Method: "GET"},
@@ -110,12 +114,26 @@ func TestGetApiTable(t *testing.T) {
 	group, b := GetGroup("/audit")
 
 	assert.True(t, b)
-	a := GetApiTable(group)
+	a := GetApiList(group)
 	assert.Equal(t, a[0], ApiInfo{
 		Name:     "ping audit",
 		FullPath: "/audit/ping",
 		Method:   "GET",
 	})
+}
+
+func TestGetApiMap(t *testing.T) {
+	initApi()
+	expect := map[[2]string]string{
+		[2]string{"DELETE", "/base/menu/:id"}:   "delete menu by id",
+		[2]string{"DELETE", "/base/user/:id"}:   "delete user by id",
+		[2]string{"GET", "/audit/ping"}:         "ping audit",
+		[2]string{"GET", "/base/log/mysql/:id"}: "query mysql log by id",
+		[2]string{"GET", "/base/menu/:id"}:      "query menu by id",
+		[2]string{"GET", "/base/user/:id"}:      "query user by id",
+		[2]string{"GET", "/hello"}:              "hello",
+		[2]string{"PUT", "/base/config"}:        "put basic service config"}
+	assert.Equal(t, expect, GetApiMap())
 }
 
 func initApi() {

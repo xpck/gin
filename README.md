@@ -21,6 +21,11 @@ type ApiGroup struct {
 	Api   []ApiInfo   `json:"api"`
 }
 ```
+## Api
+- `func GetApiList(group *ApiGroup) []ApiInfo`
+- `func GetApiMap() map[[2]string]string`
+- `func GetGroup(path string) (*ApiGroup, bool)`
+- `func GetApiName(method, fullPath string) (string, bool)`
 - Add two function to get information about api.(If you use builtin method, that you can't get information from the following two APIs)
   - `func GetGroup(path string) (*ApiGroup, bool)`
   - `func GetApiName(method string, fullPath string) (string, bool)`
