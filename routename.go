@@ -13,9 +13,10 @@ var (
 
 // ApiInfo record api information, about name, path, method, such as: ApiInfo{ Name:"query user list", FullPath:"/user/:id", Method:"GET"}.
 type ApiInfo struct {
-	Name     string `json:"name"`
-	FullPath string `json:"full_path"`
-	Method   string `json:"method"`
+	Name      string `json:"name"`
+	FullPath  string `json:"full_path"`
+	Method    string `json:"method"`
+	GroupPath string `json:"group_path"`
 }
 
 type ApiGroup struct {
@@ -44,9 +45,10 @@ func (a *ApiGroup) setRoute(method, basePath, fullPath, name string) {
 	apiMap[[2]string{method, fullPath}] = name
 	if a.Path == basePath {
 		a.Api = append(a.Api, ApiInfo{
-			Name:     name,
-			FullPath: fullPath,
-			Method:   method,
+			Name:      name,
+			FullPath:  fullPath,
+			Method:    method,
+			GroupPath: basePath,
 		})
 	} else {
 		for _, group := range a.Group {
@@ -87,11 +89,7 @@ func (a *ApiGroup) getGroup(path string) *ApiGroup {
 func GetGroup(path string) (*ApiGroup, bool) {
 	group := api.getGroup(path)
 
-	if group == nil {
-		return nil, false
-	}
-
-	return group, true
+	return group, group != nil
 }
 
 // GetApiName return api name.

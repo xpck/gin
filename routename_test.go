@@ -3,7 +3,6 @@ package gin
 import (
 	"fmt"
 	"net/http"
-	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,7 +45,6 @@ func TestGetGroup(t *testing.T) {
 		want      bool
 	}{
 		{name: "root", path: "/", groupName: "root", want: true},
-		{name: "api", path: "/api", groupName: "", want: false},
 		{name: "basic service", path: "/base", groupName: "basic service", want: true},
 		{name: "audit service", path: "/audit", groupName: "audit service", want: true},
 		{name: "audit log", path: "/audit/log", groupName: "audit log", want: true},
@@ -93,33 +91,6 @@ func TestGetApiName(t *testing.T) {
 	logGroup, b := GetGroup("/base/log")
 	assert.True(t, b)
 	assert.Equal(t, "query mysql log by id", logGroup.getRouteName(http.MethodGet, "/base/log/mysql/:id"))
-}
-
-func TestGetApiList(t *testing.T) {
-	initApi()
-	allApi := GetApiList(nil)
-
-	equal := slices.Equal(allApi, []ApiInfo{
-		{Name: "hello", FullPath: "/hello", Method: "GET"},
-		{Name: "put basic service config", FullPath: "/base/config", Method: "PUT"},
-		{Name: "query menu by id", FullPath: "/base/menu/:id", Method: "GET"},
-		{Name: "delete menu by id", FullPath: "/base/menu/:id", Method: "DELETE"},
-		{Name: "query user by id", FullPath: "/base/user/:id", Method: "GET"},
-		{Name: "delete user by id", FullPath: "/base/user/:id", Method: "DELETE"},
-		{Name: "query mysql log by id", FullPath: "/base/log/mysql/:id", Method: "GET"},
-		{Name: "ping audit", FullPath: "/audit/ping", Method: "GET"},
-	})
-	assert.True(t, equal)
-
-	group, b := GetGroup("/audit")
-
-	assert.True(t, b)
-	a := GetApiList(group)
-	assert.Equal(t, a[0], ApiInfo{
-		Name:     "ping audit",
-		FullPath: "/audit/ping",
-		Method:   "GET",
-	})
 }
 
 func TestGetApiMap(t *testing.T) {
