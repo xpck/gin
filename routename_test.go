@@ -139,3 +139,17 @@ func initApi() {
 		engine.GETEX("hello", "hello", emptyHandler)
 	}
 }
+
+func Test_setGroup(t *testing.T) {
+	var apiGroup = &ApiGroup{
+		Path:  "/",
+		Name:  "root",
+		Group: make([]*ApiGroup, 0),
+		Api:   []ApiInfo{},
+	}
+	apiGroup.setGroup("/", "/base", "basic service")
+	apiGroup.setGroup("/", "/base", "base service")
+	assert.Equal(t, len(apiGroup.Group), 1)
+	apiGroup.setGroup("/", "/audit", "base service")
+	assert.Equal(t, 2, len(apiGroup.Group))
+}

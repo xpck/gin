@@ -28,12 +28,20 @@ type ApiGroup struct {
 
 func (a *ApiGroup) setGroup(basePath, path, name string) {
 	if a.Path == basePath {
-		a.Group = append(a.Group, &ApiGroup{
-			Path:  path,
-			Name:  name,
-			Group: []*ApiGroup{},
-			Api:   []ApiInfo{},
-		})
+		var exist = false
+		for _, group := range a.Group {
+			if group.Path == path {
+				exist = true
+			}
+		}
+		if !exist {
+			a.Group = append(a.Group, &ApiGroup{
+				Path:  path,
+				Name:  name,
+				Group: []*ApiGroup{},
+				Api:   []ApiInfo{},
+			})
+		}
 	} else {
 		for _, group := range a.Group {
 			group.setGroup(basePath, path, name)
