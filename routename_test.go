@@ -134,6 +134,7 @@ func initApi() {
 	{
 		audit := engine.GroupEX("audit", "audit service")
 		audit.GETEX("ping", "ping audit", emptyHandler)
+		audit.POSTEX("", "create audit", emptyHandler)
 	}
 	{
 		engine.GETEX("hello", "hello", emptyHandler)
@@ -152,4 +153,12 @@ func Test_setGroup(t *testing.T) {
 	assert.Equal(t, len(apiGroup.Group), 1)
 	apiGroup.setGroup("/", "/audit", "base service")
 	assert.Equal(t, 2, len(apiGroup.Group))
+}
+
+func TestGetApiList(t *testing.T) {
+	initApi()
+	list := GetApiList(nil)
+	for _, info := range list {
+		t.Log(info)
+	}
 }
