@@ -70,39 +70,33 @@ func (c *Context) ServerError(errCode int, err error) {
 	})
 }
 
-// BadRequest return {"err_code": errCode, "err": err.Error()}, the status code is http.StatusBadRequest
+// BadRequest return {"err": err.Error()}, the status code is http.StatusBadRequest
 // If err is nil, the err = "client bad request", but not suggest
-// The "code" is error code, you must custom define it.
-func (c *Context) BadRequest(errCode int, err error) {
+func (c *Context) BadRequest(err error) {
 	if err == nil {
 		err = errors.New(_badRequest)
 	}
 	c.JSON(http.StatusBadRequest, H{
-		_code: errCode,
-		_err:  err.Error(),
+		_err: err.Error(),
 	})
 
 	c.Errors = append(c.Errors, &Error{
-		Err:  err,
-		Meta: errCode,
+		Err: err,
 	})
 }
 
-// BadReqStr return {"err_code": errCode, "err": msg}, the status code is http.StatusBadRequest
+// BadReqStr return {"err": msg}, the status code is http.StatusBadRequest
 // If err is nil, the err = "client bad request", but not suggest
-// The "code" is error code, you must custom define it.
-func (c *Context) BadReqStr(errCode int, msg string) {
+func (c *Context) BadReqStr(msg string) {
 	if msg == "" {
 		msg = _badRequest
 	}
 	c.JSON(http.StatusBadRequest, H{
-		_code: errCode,
-		_err:  msg,
+		_err: msg,
 	})
 
 	c.Errors = append(c.Errors, &Error{
-		Err:  errors.New(msg),
-		Meta: errCode,
+		Err: errors.New(msg),
 	})
 }
 
