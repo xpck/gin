@@ -44,9 +44,9 @@ func (c *Context) SuccessData(data any) {
 	})
 }
 
-// NoData return {"msg": "empty", "data": data}, the status code is http.StatusNoContent
+// NoData return {"msg": "empty", "data": data}, the status code is http.StatusOK
 func (c *Context) NoData(data any) {
-	c.JSON(http.StatusNoContent, H{
+	c.JSON(http.StatusOK, H{
 		_msg:  empty,
 		_data: data,
 	})
